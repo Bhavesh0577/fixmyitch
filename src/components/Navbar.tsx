@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Lightbulb, LogIn } from 'lucide-react'
 
 export function Navbar() {
   const [user, setUser] = useState<any>(null)
@@ -46,18 +47,21 @@ export function Navbar() {
   }
 
   return (
-    <header className="border-b bg-white/70 backdrop-blur-md sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-        <Link href="/" className="text-xl font-semibold tracking-tight hover:opacity-80 transition-opacity">
-          Fix My Itch <span className="text-gray-400 font-normal text-sm ml-2">by Mandira</span>
+    <header className="sticky top-0 z-50 border-b border-zinc-200 bg-white/85 backdrop-blur-md">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 lg:px-6">
+        <Link href="/" className="flex items-center gap-2 text-lg font-semibold tracking-tight transition-opacity hover:opacity-80">
+          <span className="flex size-8 items-center justify-center rounded-lg bg-zinc-950 text-white">
+            <Lightbulb className="size-4" />
+          </span>
+          Fix My Itch <span className="hidden text-sm font-normal text-zinc-400 sm:inline">by Mandira</span>
         </Link>
         
-        <div className="flex items-center gap-6">
-          <nav className="text-sm font-medium text-gray-500 flex gap-4">
-            <Link href="/" className="hover:text-gray-900 transition-colors">Marketplace</Link>
+        <div className="flex items-center gap-4">
+          <nav className="hidden text-sm font-medium text-zinc-500 sm:flex sm:gap-4">
+            <Link href="/" className="transition-colors hover:text-zinc-950">Marketplace</Link>
           </nav>
           
-          {user && (
+          {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
@@ -84,6 +88,13 @@ export function Navbar() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+          ) : (
+            <Button asChild variant="outline">
+              <Link href="/login">
+                <LogIn className="size-4" />
+                Sign in
+              </Link>
+            </Button>
           )}
         </div>
       </div>

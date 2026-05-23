@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Fix My Itch by Mandira',
-  description: 'Share and validate your app ideas with AI',
+  title: 'Fix My Itch Market',
+  description: 'Discover, validate, and publish startup ideas powered by real market research.',
 };
 
 export default function RootLayout({

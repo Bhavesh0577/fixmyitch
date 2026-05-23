@@ -1,79 +1,148 @@
-import { createClient } from '@/utils/supabase/server'
-import { cookies } from 'next/headers'
+import Link from 'next/link'
+import { ArrowLeft, BadgeIndianRupee, Gauge, Lightbulb, Target, Users } from 'lucide-react'
+import type { ComponentType } from 'react'
+
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { createClient } from '@/utils/supabase/server'
+import { normalizeIdea, type IdeaRecord } from '@/lib/ideas'
 
-export default async function IdeaPage({ params }: { params: { id: string } | Promise<{ id: string }> }) {
-  const cookieStore = await cookies()
+export default async function IdeaPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
-  const resolvedParams = await params
-  const ideaId = resolvedParams?.id
+  const { id } = await params
 
-  if (!ideaId) {
-    return (
-      <div className="max-w-4xl mx-auto px-4 py-12">
-        <div className="bg-white p-8 rounded-xl border border-gray-200 shadow-sm text-center">
-          <h1 className="text-3xl font-semibold mb-3 text-gray-900">Idea not found</h1>
-          <p className="text-gray-600 mb-6">The idea link is missing an id.</p>
-          <a href="/" className="inline-flex items-center justify-center rounded-md border border-emerald-200 px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50">
-            Back to marketplace
-          </a>
-        </div>
-      </div>
-    )
+  if (!id) return <IdeaNotFound message="The idea link is missing an id." />
+
+  const { data } = await supabase.from('ideas').select('*').eq('id', id).maybeSingle()
+
+  if (!data) {
+    return <IdeaNotFound message="This idea may not have been saved to the marketplace yet, or it was removed." />
   }
 
-  const { data: idea } = await supabase
-    .from('ideas')
-    .select('*')
-    .eq('id', ideaId)
-    .maybeSingle()
-
-  if (!idea) {
-    return (
-      <div className="max-w-4xl mx-auto px-4 py-12">
-        <div className="bg-white p-8 rounded-xl border border-gray-200 shadow-sm text-center">
-          <h1 className="text-3xl font-semibold mb-3 text-gray-900">Idea not found</h1>
-          <p className="text-gray-600 mb-6">This idea may not have been saved to the marketplace yet, or it was removed.</p>
-          <a href="/" className="inline-flex items-center justify-center rounded-md border border-emerald-200 px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50">
-            Back to marketplace
-          </a>
-        </div>
-      </div>
-    )
-  }
+  const idea = normalizeIdea(data as IdeaRecord)
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12">
-      <div className="bg-white p-8 rounded-xl border border-gray-200 shadow-sm">
-        <div className="flex justify-between items-start gap-6">
-          <div className="flex-1">
-            <div className="flex items-center gap-3 mb-4">
-              <Badge variant="outline" className="text-gray-500">{new Date(idea.created_at).toLocaleDateString()}</Badge>
+    <main className="min-h-screen bg-[#f7f7f4]">
+      <div className="mx-auto max-w-6xl px-4 py-8 lg:px-6">
+        <Button asChild variant="ghost" className="mb-6">
+          <Link href="/">
+            <ArrowLeft className="size-4" />
+            Marketplace
+          </Link>
+        </Button>
+
+        <article className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <section className="rounded-lg border border-zinc-200 bg-white p-5 lg:p-7">
+            <div className="mb-5 flex flex-wrap items-center gap-2">
+              <Badge variant="outline" className="rounded-full bg-sky-50 text-sky-800">
+                {idea.category}
+              </Badge>
+              <Badge variant="outline" className="rounded-full text-zinc-500">
+                {new Date(idea.createdAt).toLocaleDateString()}
+              </Badge>
+              {idea.tags.slice(0, 4).map((tag) => (
+                <span key={tag} className="rounded-full bg-zinc-100 px-2 py-1 text-xs text-zinc-600">
+                  {tag}
+                </span>
+              ))}
             </div>
 
-            <h1 className="text-3xl font-semibold mb-4 text-gray-900">{idea.title}</h1>
+            <h1 className="max-w-3xl text-3xl font-semibold tracking-tight text-zinc-950 lg:text-4xl">{idea.title}</h1>
+            <p className="mt-5 whitespace-pre-wrap text-base leading-7 text-zinc-600">{idea.description}</p>
 
-            <div className="prose max-w-none text-gray-700 mb-8 whitespace-pre-wrap">
-              {idea.description}
+            <div className="mt-8 grid gap-3 sm:grid-cols-3">
+              <BriefTile icon={Users} label="Best audience" value={idea.audience} />
+              <BriefTile icon={Target} label="Validation stage" value={idea.stage} />
+              <BriefTile icon={BadgeIndianRupee} label="Revenue path" value={idea.monetization} />
             </div>
-          </div>
 
-          <div className="flex flex-col items-center p-4 bg-gray-50 rounded-lg min-w-[120px]">
-            <span className="text-sm text-gray-500 mb-2">Uniqueness</span>
-            <span className="text-3xl font-bold text-emerald-600">{idea.score ? `${idea.score}/10` : 'TBD'}</span>
-          </div>
-        </div>
+            <div className="mt-8 border-t border-zinc-100 pt-6">
+              <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold text-zinc-950">
+                <Lightbulb className="size-5 text-amber-500" />
+                AI market brief
+              </h2>
+              <div className="whitespace-pre-wrap rounded-lg border border-emerald-100 bg-emerald-50/70 p-5 text-sm leading-7 text-emerald-950">
+                {idea.evaluation || 'No evaluation saved yet.'}
+              </div>
+            </div>
+          </section>
 
-        <div className="border-t border-gray-100 pt-8 mt-4">
-          <h3 className="text-lg font-medium mb-3">AI Evaluation (Perplexity)</h3>
-          <div className="bg-emerald-50 rounded-lg p-5 text-emerald-900 text-sm leading-relaxed whitespace-pre-wrap">
-            {idea.evaluation}
-          </div>
-        </div>
+          <aside className="space-y-4">
+            <div className="rounded-lg border border-zinc-200 bg-zinc-950 p-5 text-white">
+              <p className="mb-4 flex items-center gap-2 text-sm text-zinc-300">
+                <Gauge className="size-4" />
+                Builder scorecard
+              </p>
+              <div className="space-y-4">
+                <ScoreRow label="Overall" value={idea.score} />
+                <ScoreRow label="Demand" value={idea.demandScore} />
+                <ScoreRow label="Uniqueness" value={idea.uniquenessScore} />
+                <ScoreRow label="Build difficulty" value={idea.difficultyScore} inverse />
+              </div>
+            </div>
 
-        <div className="border-t border-gray-100 pt-6 mt-8">
-          <span className="text-sm text-gray-500">Submitted by Anonymous</span>
+            <div className="rounded-lg border border-zinc-200 bg-white p-5">
+              <h2 className="text-base font-semibold text-zinc-950">How to use this idea</h2>
+              <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-6 text-zinc-600">
+                <li>Interview five people from the audience segment.</li>
+                <li>Confirm the current workaround and cost of the pain.</li>
+                <li>Build only the MVP wedge that removes the first painful step.</li>
+                <li>Publish learning back into the marketplace.</li>
+              </ol>
+            </div>
+          </aside>
+        </article>
+      </div>
+    </main>
+  )
+}
+
+function IdeaNotFound({ message }: { message: string }) {
+  return (
+    <main className="min-h-screen bg-[#f7f7f4]">
+      <div className="mx-auto max-w-3xl px-4 py-12">
+        <div className="rounded-lg border border-zinc-200 bg-white p-8 text-center">
+          <h1 className="text-3xl font-semibold text-zinc-950">Idea not found</h1>
+          <p className="mt-3 text-zinc-600">{message}</p>
+          <Button asChild className="mt-6">
+            <Link href="/">Back to marketplace</Link>
+          </Button>
         </div>
+      </div>
+    </main>
+  )
+}
+
+function BriefTile({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: ComponentType<{ className?: string }>
+  label: string
+  value: string
+}) {
+  return (
+    <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4">
+      <Icon className="mb-3 size-5 text-sky-700" />
+      <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">{label}</p>
+      <p className="mt-1 text-sm font-medium leading-5 text-zinc-950">{value}</p>
+    </div>
+  )
+}
+
+function ScoreRow({ label, value, inverse = false }: { label: string; value: number; inverse?: boolean }) {
+  const width = `${Math.max(10, Math.min(100, value * 10))}%`
+  const tone = inverse ? 'bg-amber-400' : value >= 8 ? 'bg-emerald-400' : value >= 6 ? 'bg-sky-400' : 'bg-amber-400'
+
+  return (
+    <div>
+      <div className="mb-1 flex items-center justify-between text-sm">
+        <span className="text-zinc-300">{label}</span>
+        <span className="font-semibold">{value}/10</span>
+      </div>
+      <div className="h-2 overflow-hidden rounded-full bg-white/10">
+        <div className={`h-full rounded-full ${tone}`} style={{ width }} />
       </div>
     </div>
   )
