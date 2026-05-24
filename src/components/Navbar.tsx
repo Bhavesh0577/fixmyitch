@@ -48,16 +48,17 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-zinc-200 bg-white/85 backdrop-blur-md">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 lg:px-6">
-        <Link href="/" className="flex items-center gap-2 text-lg font-semibold tracking-tight transition-opacity hover:opacity-80">
-          <span className="flex size-8 items-center justify-center rounded-lg bg-zinc-950 text-white">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-3 py-3 sm:px-4 lg:px-6">
+        <Link href="/" className="flex min-w-0 items-center gap-2 text-base font-semibold tracking-tight transition-opacity hover:opacity-80 sm:text-lg">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-zinc-950 text-white">
             <Lightbulb className="size-4" />
           </span>
-          Fix My Itch <span className="hidden text-sm font-normal text-zinc-400 sm:inline">by Mandira</span>
+          <span className="truncate">Fix My Itch</span>
+          <span className="shrink-0 text-xs font-normal text-zinc-400 sm:text-sm">by Mandira</span>
         </Link>
         
         <div className="flex items-center gap-4">
-          <nav className="hidden text-sm font-medium text-zinc-500 sm:flex sm:gap-4">
+          <nav className="hidden text-sm font-medium text-zinc-500 md:flex md:gap-4">
             <Link href="/" className="transition-colors hover:text-zinc-950">Marketplace</Link>
           </nav>
           
@@ -89,10 +90,10 @@ export function Navbar() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Button asChild variant="outline">
+            <Button asChild variant="outline" className="px-2.5 sm:px-3">
               <Link href="/login">
                 <LogIn className="size-4" />
-                Sign in
+                <span className="hidden sm:inline">Sign in</span>
               </Link>
             </Button>
           )}

@@ -16,6 +16,7 @@ import { ideaCategories, type MarketplaceIdea } from '@/lib/ideas'
 type MarketplaceExplorerProps = {
   ideas: MarketplaceIdea[]
   errorMessage?: string
+  compact?: boolean
 }
 
 const sortOptions = [
@@ -31,7 +32,7 @@ function scoreTone(score: number) {
   return 'text-amber-700 bg-amber-50 border-amber-200'
 }
 
-export function MarketplaceExplorer({ ideas, errorMessage }: MarketplaceExplorerProps) {
+export function MarketplaceExplorer({ ideas, errorMessage, compact = false }: MarketplaceExplorerProps) {
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('All')
   const [sort, setSort] = useState('hot')
@@ -113,7 +114,7 @@ export function MarketplaceExplorer({ ideas, errorMessage }: MarketplaceExplorer
         ))}
       </div>
 
-      {topIdea ? (
+      {topIdea && !compact ? (
         <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
           <Link href={`/ideas/${topIdea.id}`} className="block">
             <Card className="h-full rounded-lg border-0 bg-zinc-950 text-white ring-0 transition-transform hover:-translate-y-0.5">
@@ -154,7 +155,7 @@ export function MarketplaceExplorer({ ideas, errorMessage }: MarketplaceExplorer
       ) : null}
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {filteredIdeas.map((idea) => (
+        {(compact ? filteredIdeas.slice(0, 6) : filteredIdeas).map((idea) => (
           <Link key={idea.id} href={`/ideas/${idea.id}`} className="block">
             <Card className="h-full rounded-lg border-zinc-200 bg-white shadow-none transition-all hover:-translate-y-0.5 hover:border-sky-300 hover:shadow-sm">
               <CardHeader className="gap-3 px-4">
